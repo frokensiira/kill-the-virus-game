@@ -25,12 +25,64 @@ app.set('port', port);
 const server = http.createServer(app);
 const io = SocketIO(server);
 
+let players = {};
+
+// Get usernames of online users
+const getOnlinePlayers = () => {
+  return Object.values(players);
+}
+
 io.on('connection', (socket) => {
 	debug('A client connected!');
 
 	socket.on('disconnect', () => {
-		debug('Someone left the game :(');
-	});
+    debug('Someone left the game :(');
+    
+    // broadcast to all connected sockets that this user has left the chat
+	if (players[socket.id]) {
+		socket.broadcast.emit('user-disconnected', players[socket.id]);
+  }
+  
+  // remove user from list of connected users
+	delete players[socket.id];
+  });
+  
+
+  /**
+  * Handle a new player
+  */
+   
+  socket.on('register-user', (username, cb) => {
+    debug("User '%s' connected to the game", username);
+
+    const onlinePlayers = getOnlinePlayers();
+    if(onlinePlayers.length > 1 ) {
+      socket.emit('room-full');
+      return;
+    }
+
+    players[socket.id] = username;
+
+
+    cb({
+      joinGame: true,
+      usernameInUse: false,
+      onlinePlayers: getOnlinePlayers(),
+    });
+
+    // broadcast to all connected sockets EXCEPT ourselves
+
+    if(onlinePlayers.length === 1 ) {
+      socket.broadcast.emit('new-user-connected', username);
+
+      io.emit('start-game')
+    }
+	 /*  socket.broadcast.emit('new-user-connected', username); */
+
+    // broadcast online users to all connected sockets EXCEPT ourselves
+	  socket.broadcast.emit('online-users', getOnlinePlayers());
+
+  });
 });
 
 /**

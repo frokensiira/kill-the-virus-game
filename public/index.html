@@ -12,45 +12,47 @@
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body class="background">
-    <div id="game">
+
+    <div id="start">
+
+        <h1 id="game-title">Kill the virus</h1>
+        <div id="login-box">
+            <form id="login-form" class="form-group form-inline">
+                <input type="text" id="username" class="form-control form-control-lg mr-3"
+                placeholder="Player name" required>
+                <button type="submit" class="btn btn-outline-info btn-lg" id="login-button">Join</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="game" class="d-none">
         
-        <div id="score-board-menu" class="d-none">
-            <div id="players">
+        <div id="score-board-menu" >
+
+            <div id="players-wrapper">
                 <h1>Players</h1>
-                <h2>My</h2>
-                <h2>Christoffer</h2>
+                <ul id="players-list">
+                </ul>
             </div>
+
             <div id="score">
                 <h1>Score</h1>
                 <h2>2</h2>
                 <h2>1</h2>
             </div>
+
             <div id="previous-reaction-time">
                 <h1>Previous time</h1>
                 <h2>2.1</h2>
                 <h2>1.8</h2>
             </div>
+
             <div id="timer-box">
                 <div id="timer">HH : MM : SS</div>
             </div>
-        </div>
-        <div id="game-area">
-
-            <h1 id="game-title">Kill the virus</h1>
-
-            <div id="login-box">
-                <form id="login" class="form-group">
-                    <input type="text" class="form-control form-control-lg"
-                    placeholder="Player name">
-                </form>
-                <div class="form-group">
-                    <div class="col-sm-10">
-                      <button type="submit" class="btn btn-outline-info btn-lg">Join</button>
-                    </div>
-                  </div>
-            </div>
 
         </div>
+        <div id="game-area"></div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
