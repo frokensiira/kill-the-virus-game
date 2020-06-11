@@ -98,7 +98,7 @@ img {
     height: 80%;
     padding: 5px;
 }
-
+     
 #timer {
     background-color: red;
 }
@@ -106,11 +106,13 @@ img {
 #game-area {
     height: 90vh;
     width: 100vw;
+    position: relative;
 }
 
 #virus {
     position: absolute;
-
+/*     top: 1063px;
+    left: 1325px; */
 }
 
 

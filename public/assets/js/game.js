@@ -5,92 +5,156 @@ const socket = io();
 const loginForm = document.querySelector('#login-form');
 const start = document.querySelector('#start');
 const game = document.querySelector('#game');
-const virus = document.querySelector('#virus');
+const gameArea = document.querySelector('#game-area');
+
+// create virus
+const virus = document.createElement('img');
+virus.setAttribute("src", "./assets/images/a.svg"); 
+virus.setAttribute("id", "virus");
 
 let username = null;
 
+// Functions
+
+// Render players in the player list
 const updateOnlinePlayers = (players) => {
 	document.querySelector('#players-list').innerHTML = players.map(player => `<li class="player">${player}</li>`).join("");
 }
 
 // Emit events
+
+// Handle new player registration
 loginForm.addEventListener('submit', e => {
     e.preventDefault();
 
     username = document.querySelector('#username').value;
     socket.emit('register-user', username, (status) => {
 
+        // if ok from server
         if(status.joinGame){
+            // "send" player to game
             start.classList.add('d-none');
             game.classList.remove('d-none');
+
+            // and update the player list
             updateOnlinePlayers(status.onlinePlayers);
         }
-
-/*         if(status.onlinePlayers.length === 2) {
-            alert('Ready to start playing zome gamez?');
-            socket.emit()
-        } */
-
-        //console.log('this is onlinePlayers now', status.onlinePlayers);
-        
+        return;
     });
     
 });
 
 
 //Listen for events
-socket.on('reconnect', () => {
+
+
+/* socket.on('reconnect', () => {
 	if(username) {
 		socket.emit('register-user', username, () => {
 			console.log("Server acknowledged our reconnect :)");
 		})
 	}
-});
+}); */
 
+// add new user to the other player's player list as well
 socket.on('online-users', users => {
 	updateOnlinePlayers(users)
 });
 
+// let player 1 know who joined the game, figure out how
 socket.on('new-user-connected', username => {
     console.log(`${username} connected to the game`);
     //alert(`${username} joined the game`);
-
-    
-
+             
 });
 
-function getRandomPosition(element) {
-    console.log('document is', document);
+// original function
+/* function getRandomPosition(element) {
 	const x = document.body.offsetHeight-element.clientHeight;
 	const y = document.body.offsetWidth-element.clientWidth;
 	const randomX = Math.floor(Math.random()*x);
 	const randomY = Math.floor(Math.random()*y);
 	return [randomX,randomY];
-}
+} */
 
 
-socket.on('start-game', () => {
+// Before server implementation
+// my function
+/* function getRandomPosition(gameArea, virus) {
+    
+	const x = gameArea.offsetHeight-virus.clientHeight;
+	const y = gameArea.offsetWidth-virus.clientWidth;
+	const randomX = Math.floor(Math.random()*x);
+    const randomY = Math.floor(Math.random()*y);
+	return [randomX,randomY];
+} */
+
+/* socket.on('start-game', () => {
+
+    // create virus
     const virus = document.createElement('img');
     virus.setAttribute("src", "./assets/images/a.svg"); 
     virus.setAttribute("id", "virus");
-    document.querySelector('#game-area').append(virus);
+
     const gameArea = document.querySelector('#game-area');
-    console.log('this is document body', document.body);
-    const xy = getRandomPosition(element);
+    
+    const xy = getRandomPosition(gameArea, virus);
 
     virus.style.top = xy[0] + 'px';
-	virus.style.left = xy[1] + 'px';
+    virus.style.left = xy[1] + 'px';
+    
+    document.querySelector('#game-area').append(virus);
 
-    console.log('virus is', virus);
+}) */
+
+/* function getRandomPosition(x, y) {
+	
+	const randomX = Math.floor(Math.random()*x);
+    const randomY = Math.floor(Math.random()*y);
+	return [randomX,randomY];
+} */
+
+
+  
+socket.on('start-game', () => {
+
+    // Adding temporary virus to get measures, then remove it
+    gameArea.append(virus);
+    const x = gameArea.offsetHeight-virus.offsetHeight;
+    const y = gameArea.offsetWidth-virus.offsetWidth;
+    virus.remove();
+    
+    const measures = {x, y}
+
+    socket.emit('set-random-position', measures);    
+    console.log('this is start-game');
+
+});
+
+socket.on('render-virus', (xy) => {
+
+    virus.style.top = xy[0] + 'px';
+    virus.style.left = xy[1] + 'px';
+
+    gameArea.append(virus);
+    const renderTime = Date.now();
+    console.log('Virus rendered', renderTime);
 
     virus.addEventListener('click', e => {
-        console.log('someone clicked me');
-        console.log(e.target);
+        virus.remove();
+        const clickTime = Date.now();
+        console.log('Virus clicked', clickTime);
+
+        const reactTime = clickTime - renderTime;
+        console.log('reactionTime is', reactTime);
+
+        socket.emit('reaction-time', reactTime)
     });
-})
+});
 
 socket.on('user-disconnected', username => {
-	console.log(`${username} left the game`);
+    console.log(`${username} left the game`);
+    alert(`${username} left the game`)
 });
 
 socket.on('room-full', () => {
