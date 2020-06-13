@@ -64,7 +64,7 @@ const io = SocketIO(server);
 
 let players = {};
 
-const playerProfiles = [];
+let playerProfiles = [];
 
 let playerReady = 0;
 
@@ -112,7 +112,14 @@ io.on('connection', (socket) => {
     // add a check here to make sure the username is not already taken. Compare onlinePlayers with username. //
 
     // add username to players
-    players[socket.id] = username;
+	players[socket.id] = username;
+	
+	// create player
+	/* playerProfile = {
+		socketId: socket.id,
+		username,
+		reactionTime
+	} */
 
 	//new code connected to new layout
 	const responseData = {
@@ -154,7 +161,7 @@ io.on('connection', (socket) => {
 
   });
 
-  socket.on('reaction-time', reactTime => {
+/*   socket.on('reaction-time', reactTime => {
 
     console.log('reactTime is', reactTime);
 
@@ -170,9 +177,19 @@ io.on('connection', (socket) => {
       username: players[socket.id],
       reactionTime
 	}
-	
+
 	console.log('this is playerProfile', playerProfile);
-  })
+
+	playerProfiles.push(playerProfile);
+	
+	console.log('PlayerProfiles', playerProfiles);
+
+	console.log(`this is ${playerProfile.username}s time`, playerProfile.reactionTime);
+
+	const timePlayerOne = playerProfiles[0].reactionTime
+
+	console.log('this is playerOnes time', timePlayerOne);
+  }) */
 
   socket.on('disconnect', () => {
     debug(`${players[socket.id]} left the game :(`);
@@ -185,7 +202,10 @@ io.on('connection', (socket) => {
     delete players[socket.id];
 
     // reset playerReady
-    playerReady = 0;
+	playerReady = 0;
+	
+	// reset playerProfiles
+ 	playerProfiles = [];
     
     // make sure the player is removed from the list
     socket.broadcast.emit('online-users', getOnlinePlayers());
