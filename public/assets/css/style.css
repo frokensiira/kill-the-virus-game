@@ -66,7 +66,6 @@ body {
 /*     display: flex; */
     height: 15vh;
     width: 100vw;
-
     background-color: rgba(11, 2, 43, 0.8);
     box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
     border-radius: 0px 0px 50em 50em;
@@ -89,6 +88,13 @@ body {
 #board-wrapper h1 {
     background-color: rgb(253, 241, 241);
     border-radius: 0px 0px 40em 40em;
+    background-image: linear-gradient(-180deg, #FF89D6 0%, #C01F9E 100%);
+	box-shadow: 0 1rem 1.25rem 0 rgba(22,75,195,0.50),
+    0 -0.25rem 1.5rem rgba(110, 15, 155, 1) inset,
+    0 0.75rem 0.5rem rgba(255,255,255, 0.4) inset,
+    0 0.25rem 0.5rem 0 rgba(180, 70, 207, 1) inset;
+
+    border: 1px solid #012880;
 }
 
 #board-wrapper ul{
@@ -119,6 +125,14 @@ span.fa-user {
 #player-two {
     color: white;
     font-size: 2rem;
+}
+
+#players-list li:nth-child(odd) {
+	color: #88F67B;
+}
+
+#players-list li:nth-child(even) {
+	color: white;
 }
 
 #score {
@@ -167,6 +181,12 @@ span.fa-user {
     height: 85vh;
     width: 100vw;
     position: relative;
+}
+
+#waiting-text {
+    color: white;
+    text-align: center;
+    margin-top: 5rem;
 }
 
 #virus {

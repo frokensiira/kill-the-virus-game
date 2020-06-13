@@ -12,6 +12,10 @@ const virus = document.createElement('img');
 virus.setAttribute("src", "./assets/images/a.svg"); 
 virus.setAttribute("id", "virus");
 
+const waitingInfo = document.createElement('h3');
+waitingInfo.innerText = 'Waiting for a second player to join...';
+waitingInfo.setAttribute("id", "waiting-text");
+
 let username = null;
 
 // Functions
@@ -21,9 +25,6 @@ const updateOnlinePlayers = (players) => {
 	document.querySelector('#players-list').innerHTML = players.map(player => `<li class="player"><span class="fas fa-user"></span>${player}</li>`).join("");
 }
 
-/* const updateOnlinePlayers = (players) => {
-	document.querySelector('#players-list').textContent = players.map(player => `${player}`);
-} */
 
 // Emit events
 
@@ -43,6 +44,12 @@ loginForm.addEventListener('submit', e => {
             // and update the player list
             updateOnlinePlayers(status.onlinePlayers);
         }
+
+        // if ok from server
+        if(status.playerOne){
+            gameArea.append(waitingInfo);
+        }
+
         return;
     });
     
@@ -65,11 +72,13 @@ socket.on('online-users', users => {
 	updateOnlinePlayers(users)
 });
 
+
 // let player 1 know who joined the game, figure out how
 socket.on('new-user-connected', username => {
     console.log(`${username} connected to the game`);
-    //alert(`${username} joined the game`);
-             
+    waitingInfo.innerText = `${username} joined the game. Prepare for virus extinction 😱`;
+    gameArea.append(waitingInfo);
+
 });
 
   
@@ -85,20 +94,28 @@ socket.on('start-game', () => {
 
     console.log('this is measures', measures);
 
-    socket.emit('set-random-position', measures);    
+    socket.emit('set-random-data', measures);    
     console.log('this is start-game');
 
 });
 
-socket.on('render-virus', (xy) => {
+socket.on('render-virus', (xy, randomDelay) => {
 
     console.log('rendering the virus');
     virus.style.top = xy[0] + 'px';
     virus.style.left = xy[1] + 'px';
 
-    gameArea.append(virus);
-    const renderTime = Date.now();
-    console.log('Virus rendered', renderTime);
+    console.log('randomDealy is', randomDelay);
+
+    let renderTime = null;
+    setTimeout(() => {
+        waitingInfo.remove();
+        gameArea.append(virus);
+        renderTime = Date.now();
+        console.log('Virus rendered', renderTime);
+    }, randomDelay)
+    
+    
 
     virus.addEventListener('click', e => {
         virus.remove();
@@ -109,7 +126,7 @@ socket.on('render-virus', (xy) => {
         console.log('reactionTime is', reactTime);
 
         socket.emit('reaction-time', reactTime)
-    });
+    });00
 });
 
 socket.on('user-disconnected', username => {

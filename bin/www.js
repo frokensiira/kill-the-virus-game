@@ -73,14 +73,23 @@ const getOnlinePlayers = () => {
   return Object.values(players);
 }
 
-const calcRandomPosition = (measures) => {
-  console.log('inside calcRandomPosition, measures is', measures);
+const calcRandomDelay = () => {
+  	console.log('inside calcRandomDelay');
 
-      const randomX = Math.floor(Math.random()*measures.x);
-      const randomY = Math.floor(Math.random()*measures.y);
-      
-      return [randomX,randomY];
+	const x = Math.floor(Math.random() * (3000 - 500) + 500);
+	console.log('timedelay in calcRandomDelay is now', x);
+	
+	return x;
 }
+
+const calcRandomPosition = measures => {
+	console.log('inside calcRandomPosition, measures is', measures);
+  
+	const randomX = Math.floor(Math.random()*measures.x);
+	const randomY = Math.floor(Math.random()*measures.y);
+	
+	return [randomX,randomY];
+  }
 
 // Someone connected
 io.on('connection', (socket) => {
@@ -105,19 +114,27 @@ io.on('connection', (socket) => {
     // add username to players
     players[socket.id] = username;
 
-    // trigger the callback function to answer the event from the client with some data 
-    cb({
-      joinGame: true,
-      usernameInUse: false,
-      onlinePlayers: getOnlinePlayers(),
-    });
+	//new code connected to new layout
+	const responseData = {
+		playerOne: false,
+		joinGame: true,
+		usernameInUse: false,
+		onlinePlayers: getOnlinePlayers(),
+	}
+      
+	// check if the room is empty, i.e. registered user is the first to join
+	if(onlinePlayers.length === 0 ) {
+		responseData.playerOne = true;
+	}
+
+	cb(responseData);
 
     
     // if there already is a player waiting, let her/him know that a new player joined and start the game
     if(onlinePlayers.length === 1 ) {
       socket.broadcast.emit('new-user-connected', username);
 
-      io.emit('start-game')
+	  io.emit('start-game')
     }
 
     // add new user to the other player's player list as well
@@ -125,19 +142,16 @@ io.on('connection', (socket) => {
 
   });
 
-  socket.on('set-random-position', measures => {
-    console.log('in set-random-position');
+  socket.on('set-random-data', measures => {
 
-    const onlinePlayers = getOnlinePlayers();
-    console.log('in set-random-position, this is onelinePlayers', onlinePlayers);
+	const onlinePlayers = getOnlinePlayers();
 
     playerReady += 1;
-    console.log('player ready is now', playerReady);
+
     if(playerReady === onlinePlayers.length) {
-      io.emit('render-virus', calcRandomPosition(measures));
-    }
-    
-    
+      io.emit('render-virus', calcRandomPosition(measures), calcRandomDelay());
+	}
+
   });
 
   socket.on('reaction-time', reactTime => {
@@ -151,11 +165,13 @@ io.on('connection', (socket) => {
 
     console.log('this is socket id', socket.id);
 
-/*     playerProfile = {
+    playerProfile = {
       socketId: socket.id,
       username: players[socket.id],
       reactionTime
-    } */
+	}
+	
+	console.log('this is playerProfile', playerProfile);
   })
 
   socket.on('disconnect', () => {
