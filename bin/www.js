@@ -62,34 +62,69 @@ const io = SocketIO(server);
 
 
 
-let players = {};
+/* let players = {}; */
 
 let playerProfiles = [];
 
 let playerReady = 0;
 
+let clickedVirus = 0;
+
+let rounds = 0;
+
 // Get usernames of online users
 const getOnlinePlayers = () => {
-  return Object.values(players);
+
+	return playerProfiles.map(player => player.username);
+   
+}
+
+const getScore = () => {
+	return playerProfiles.map(player => player.score);
 }
 
 const calcRandomDelay = () => {
-  	console.log('inside calcRandomDelay');
+  	//console.log('inside calcRandomDelay');
 
 	const x = Math.floor(Math.random() * (3000 - 500) + 500);
-	console.log('timedelay in calcRandomDelay is now', x);
+	//console.log('timedelay in calcRandomDelay is now', x);
 	
 	return x;
 }
 
 const calcRandomPosition = measures => {
-	console.log('inside calcRandomPosition, measures is', measures);
+	//console.log('inside calcRandomPosition, measures is', measures);
   
 	const randomX = Math.floor(Math.random()*measures.x);
 	const randomY = Math.floor(Math.random()*measures.y);
 	
 	return [randomX,randomY];
-  }
+}
+
+const calcPoints = (rounds) => {
+	//console.log(`this is ${playerProfiles[0].username}s time: ${playerProfiles[0].reactionTime[rounds]}`);
+
+	const time = playerProfiles[0].reactionTime[rounds-1] - playerProfiles[1].reactionTime[rounds-1];
+
+	if(time < 0) {
+		playerProfiles[0].score += 1;
+		console.log(`${playerProfiles[0].username} got 1 point`);
+		
+	} else {
+		playerProfiles[1].score += 1;
+		console.log(`${playerProfiles[1].username} got 1 point`);
+	}
+
+	const scoreResult = getScore();
+	console.log('this is score result', scoreResult);
+
+	io.emit('score', scoreResult, rounds);
+	if(rounds<11) {
+        io.emit('start-game');
+    }
+
+	//return (time < 0) ? playerProfiles[0].score += 1 : playerProfiles[1].score += 1;
+}
 
 // Someone connected
 io.on('connection', (socket) => {
@@ -103,7 +138,7 @@ io.on('connection', (socket) => {
     debug("User '%s' connected to the game", username);
 
     // before registering a new player, check that the room isn't already full
-    const onlinePlayers = getOnlinePlayers();
+    let onlinePlayers = getOnlinePlayers();
     if(onlinePlayers.length > 1 ) {
       socket.emit('room-full');
       return;
@@ -112,16 +147,24 @@ io.on('connection', (socket) => {
     // add a check here to make sure the username is not already taken. Compare onlinePlayers with username. //
 
     // add username to players
-	players[socket.id] = username;
+	/* players[socket.id] = username; */
 	
 	// create player
-	/* playerProfile = {
+	playerProfile = {
 		socketId: socket.id,
 		username,
-		reactionTime
-	} */
+		reactionTime: [],
+		score: 0,
+	}
 
-	//new code connected to new layout
+	console.log('playerProfile in register user is', playerProfile);
+
+	playerProfiles.push(playerProfile);
+
+	console.log('in register-user, playerProfiles is', playerProfiles);
+	//onlinePlayers = getOnlinePlayers();
+	//console.log('in register-user, online-players is', playerProfiles);
+
 	const responseData = {
 		playerOne: false,
 		joinGame: true,
@@ -141,7 +184,7 @@ io.on('connection', (socket) => {
     if(onlinePlayers.length === 1 ) {
       socket.broadcast.emit('new-user-connected', username);
 
-	  io.emit('start-game')
+	  io.emit('start-game');
     }
 
     // add new user to the other player's player list as well
@@ -150,67 +193,77 @@ io.on('connection', (socket) => {
   });
 
   socket.on('set-random-data', measures => {
+	  //console.log('in set random-data');
 
 	const onlinePlayers = getOnlinePlayers();
 
     playerReady += 1;
 
     if(playerReady === onlinePlayers.length) {
-      io.emit('render-virus', calcRandomPosition(measures), calcRandomDelay());
+	  io.emit('render-virus', calcRandomPosition(measures), calcRandomDelay());
+	  playerReady = 0;
 	}
 
   });
 
-/*   socket.on('reaction-time', reactTime => {
+  socket.on('reaction-time', reactTime => {
 
-    console.log('reactTime is', reactTime);
+	console.log('reactTime is', reactTime);
 
-    const reactionTime = [];
-    reactionTime.push(reactTime);
-
-    console.log('this is reactionTime', reactionTime);
-
-    console.log('this is socket id', socket.id);
-
-    playerProfile = {
-      socketId: socket.id,
-      username: players[socket.id],
-      reactionTime
-	}
-
-	console.log('this is playerProfile', playerProfile);
-
-	playerProfiles.push(playerProfile);
+	console.log('socket id is', socket.id);
 	
+	const player = playerProfiles.find(player => player.socketId === socket.id);
+
+	console.log('this is the player', player);
+
+	player.reactionTime.push(reactTime);
+
 	console.log('PlayerProfiles', playerProfiles);
 
-	console.log(`this is ${playerProfile.username}s time`, playerProfile.reactionTime);
+	clickedVirus += 1;
 
-	const timePlayerOne = playerProfiles[0].reactionTime
+	if(clickedVirus === playerProfiles.length) {
+		clickedVirus = 0;
+		rounds += 1;
+		calcPoints(rounds);
 
-	console.log('this is playerOnes time', timePlayerOne);
-  }) */
+		
+	}
+
+	
+
+  })
 
   socket.on('disconnect', () => {
-    debug(`${players[socket.id]} left the game :(`);
-    
-    // let the player know that the other player left the game
-    if (players[socket.id]) {
-      socket.broadcast.emit('user-disconnected', players[socket.id]);
-    
-    // remove user from list of connected users
-    delete players[socket.id];
-
-    // reset playerReady
-	playerReady = 0;
 	
-	// reset playerProfiles
- 	playerProfiles = [];
-    
-    // make sure the player is removed from the list
-    socket.broadcast.emit('online-users', getOnlinePlayers());
+	//console.log('socket.id is', socket.id);
+	//console.log('socketId is', playerProfiles[0].socketId);
 
-    console.log('this is online players in disconnect: ', getOnlinePlayers() );
+	if(playerProfiles.length < 0) {
+		const player = playerProfiles.find(element => element.socketId === socket.id).username;
+
+		//console.log('player is', player);
+	
+		debug(`${player} left the game :(`);
+	
+		// let the player know that the other player left the game
+		if (player) {
+		  socket.broadcast.emit('user-disconnected', player);
+		
+		// remove player 
+		const playerIndex = playerProfiles.findIndex(element => element.socketId === socket.id);
+		playerProfiles.splice(playerIndex);
+	
+		// reset playerReady
+		playerReady = 0;
+		
+		// make sure the player is removed from the list
+		socket.broadcast.emit('online-users', getOnlinePlayers());
+	
+		//console.log('this is online players in disconnect: ', getOnlinePlayers() );
+	}
+	
+	
   }
   
   });

@@ -129,6 +129,13 @@ socket.on('render-virus', (xy, randomDelay) => {
     });00
 });
 
+socket.on('score', (scoreResult, rounds) => {
+    document.querySelector('#player-one-score').innerText = `${scoreResult[0]}`;
+    document.querySelector('#player-two-score').innerText = `${scoreResult[1]}`;
+    console.log('this is rounds', rounds);
+
+})
+
 socket.on('user-disconnected', username => {
     console.log(`${username} left the game`);
     alert(`${username} left the game`)
