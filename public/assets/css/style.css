@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Bungee+Shade&family=Monofett&family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Bungee+Shade&family=Monofett&family=Anton&family=Press+Start+2P&display=swap');
+
+/* General styling */
 
 * {
     padding: 0;
@@ -9,13 +11,11 @@
 body {
     height: 100vh;
     background-color: #1D2F57;
-    
+    /* background-color: #297778;
+    background-color: rgba(11, 2, 43); */
 }
 
-img {
-    width: 100px;
-    height: auto;
-}
+/* First page */
 
 #start {
     height: 100vh;
@@ -27,10 +27,7 @@ img {
 }
 
 #game-title {
-    text-align: center;
-    
-/*     margin-top: 10rem; */
-    
+    text-align: center;    
     color: rgba(136, 246, 123);
 
     padding-top: 6rem;
@@ -63,56 +60,120 @@ img {
     border-radius: 10px 10px 10px 10px;
 }
 
+/* Scoreboard */
+
 #score-board-menu {
-    background-color: aliceblue;
+/*     display: flex; */
+    height: 15vh;
+    width: 100vw;
+
+    background-color: rgba(11, 2, 43, 0.8);
+    box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
+    border-radius: 0px 0px 50em 50em;
+    color: rgba(11, 2, 43);
+    font-family: 'Anton', sans-serif;
+
+}
+
+#board-wrapper {
+    background-color: #349697;
+    border-radius: 0px 0px 40em 40em;
+    height: 80%;
+    width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
-    height: 10vh;
-    width: 100vw;
-    align-items: center;
+    align-items: flex-start;
 }
 
-#score-board-menu h1{
-    font-size: 1.5rem;
+#board-wrapper h1 {
+    background-color: rgb(253, 241, 241);
+    border-radius: 0px 0px 40em 40em;
 }
 
-#score-board-menu h2 {
-    font-size: 1rem;
+#board-wrapper ul{
+    margin-bottom: 0.5rem;
 }
 
-#score-board-menu li {
+#board-wrapper li {
     list-style-type: none;
-    font-size: 1rem;
+    font-size: 2rem;
 }
 
-#timer-box {
-    display: flex;
-    background-color: black;
-    width: 200px;
-    align-items: center;
-    justify-content: center;
+#players-wrapper {
+    flex-grow: 1;
     text-align: center;
+    border-radius: 0px 0px 0px 40em;
+    margin-top: 0;
+}
+
+span.fa-user {
+    margin-right: 1rem;
+}
+
+#player-one {
+    font-size: 2rem;
+    color: #88F67B;
+}
+
+#player-two {
     color: white;
     font-size: 2rem;
-    height: 80%;
-    padding: 5px;
-}
-     
-#timer {
-    background-color: red;
 }
 
+#score {
+    /* background-color: #349697; */
+    flex-grow: 1;
+    text-align: center;
+}
+
+#player-one-score {
+    color: #88F67B;
+    font-size: 2rem;
+}
+
+#player-two-score {
+
+    color: white;
+    font-size: 2rem;
+}
+
+#time {
+    /* background-color: #349697; */
+    flex-grow: 1;
+    text-align: center;
+    border-radius: 0px 0px 40em 0px;
+}
+
+#player-one-time {
+    font-size: 2rem;
+    color: #88F67B;
+}
+
+#player-two-time {
+    color: white;
+    font-size: 2rem;
+}
+
+
+
+
+
+
+
+/* Game area */
+
 #game-area {
-    height: 90vh;
+    height: 85vh;
     width: 100vw;
     position: relative;
 }
 
 #virus {
     position: absolute;
-/*     top: 1063px;
-    left: 1325px; */
 }
 
-
+img {
+    width: 100px;
+    height: auto;
+}

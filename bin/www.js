@@ -126,10 +126,13 @@ io.on('connection', (socket) => {
   });
 
   socket.on('set-random-position', measures => {
+    console.log('in set-random-position');
 
     const onlinePlayers = getOnlinePlayers();
+    console.log('in set-random-position, this is onelinePlayers', onlinePlayers);
 
     playerReady += 1;
+    console.log('player ready is now', playerReady);
     if(playerReady === onlinePlayers.length) {
       io.emit('render-virus', calcRandomPosition(measures));
     }
@@ -164,9 +167,14 @@ io.on('connection', (socket) => {
     
     // remove user from list of connected users
     delete players[socket.id];
+
+    // reset playerReady
+    playerReady = 0;
     
     // make sure the player is removed from the list
     socket.broadcast.emit('online-users', getOnlinePlayers());
+
+    console.log('this is online players in disconnect: ', getOnlinePlayers() );
   }
   
   });

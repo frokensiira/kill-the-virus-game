@@ -18,8 +18,12 @@ let username = null;
 
 // Render players in the player list
 const updateOnlinePlayers = (players) => {
-	document.querySelector('#players-list').innerHTML = players.map(player => `<li class="player">${player}</li>`).join("");
+	document.querySelector('#players-list').innerHTML = players.map(player => `<li class="player"><span class="fas fa-user"></span>${player}</li>`).join("");
 }
+
+/* const updateOnlinePlayers = (players) => {
+	document.querySelector('#players-list').textContent = players.map(player => `${player}`);
+} */
 
 // Emit events
 
@@ -68,53 +72,6 @@ socket.on('new-user-connected', username => {
              
 });
 
-// original function
-/* function getRandomPosition(element) {
-	const x = document.body.offsetHeight-element.clientHeight;
-	const y = document.body.offsetWidth-element.clientWidth;
-	const randomX = Math.floor(Math.random()*x);
-	const randomY = Math.floor(Math.random()*y);
-	return [randomX,randomY];
-} */
-
-
-// Before server implementation
-// my function
-/* function getRandomPosition(gameArea, virus) {
-    
-	const x = gameArea.offsetHeight-virus.clientHeight;
-	const y = gameArea.offsetWidth-virus.clientWidth;
-	const randomX = Math.floor(Math.random()*x);
-    const randomY = Math.floor(Math.random()*y);
-	return [randomX,randomY];
-} */
-
-/* socket.on('start-game', () => {
-
-    // create virus
-    const virus = document.createElement('img');
-    virus.setAttribute("src", "./assets/images/a.svg"); 
-    virus.setAttribute("id", "virus");
-
-    const gameArea = document.querySelector('#game-area');
-    
-    const xy = getRandomPosition(gameArea, virus);
-
-    virus.style.top = xy[0] + 'px';
-    virus.style.left = xy[1] + 'px';
-    
-    document.querySelector('#game-area').append(virus);
-
-}) */
-
-/* function getRandomPosition(x, y) {
-	
-	const randomX = Math.floor(Math.random()*x);
-    const randomY = Math.floor(Math.random()*y);
-	return [randomX,randomY];
-} */
-
-
   
 socket.on('start-game', () => {
 
@@ -126,6 +83,8 @@ socket.on('start-game', () => {
     
     const measures = {x, y}
 
+    console.log('this is measures', measures);
+
     socket.emit('set-random-position', measures);    
     console.log('this is start-game');
 
@@ -133,6 +92,7 @@ socket.on('start-game', () => {
 
 socket.on('render-virus', (xy) => {
 
+    console.log('rendering the virus');
     virus.style.top = xy[0] + 'px';
     virus.style.left = xy[1] + 'px';
 
