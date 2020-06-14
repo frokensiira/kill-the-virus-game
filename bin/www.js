@@ -102,7 +102,7 @@ const calcRandomPosition = measures => {
 }
 
 const calcPoints = (rounds) => {
-	//console.log(`this is ${playerProfiles[0].username}s time: ${playerProfiles[0].reactionTime[rounds]}`);
+	console.log(`In calcpoints: this is ${playerProfiles[0].username}s time: ${playerProfiles[0].reactionTime[rounds-1]}`);
 
 	const time = playerProfiles[0].reactionTime[rounds-1] - playerProfiles[1].reactionTime[rounds-1];
 
@@ -117,11 +117,19 @@ const calcPoints = (rounds) => {
 
 	const scoreResult = getScore();
 	console.log('this is score result', scoreResult);
+	console.log('this is rounds', rounds);
 
 	io.emit('score', scoreResult, rounds);
-	if(rounds<11) {
+
+	if(rounds < 10) {
+		console.log('this is in start-game');
         io.emit('start-game');
-    }
+    } else {
+		console.log('this is in end-game');
+		io.emit('end-game', scoreResult);
+		rounds = 0;
+		console.log('rounds after end-game is now', rounds);
+	}
 
 	//return (time < 0) ? playerProfiles[0].score += 1 : playerProfiles[1].score += 1;
 }
@@ -136,9 +144,10 @@ io.on('connection', (socket) => {
    
   socket.on('register-user', (username, cb) => {
     debug("User '%s' connected to the game", username);
-
+	console.log('playerProfiles is', playerProfiles);
     // before registering a new player, check that the room isn't already full
-    let onlinePlayers = getOnlinePlayers();
+	let onlinePlayers = getOnlinePlayers();
+	
     if(onlinePlayers.length > 1 ) {
       socket.emit('room-full');
       return;
@@ -157,11 +166,11 @@ io.on('connection', (socket) => {
 		score: 0,
 	}
 
-	console.log('playerProfile in register user is', playerProfile);
+	//console.log('playerProfile in register user is', playerProfile);
 
 	playerProfiles.push(playerProfile);
 
-	console.log('in register-user, playerProfiles is', playerProfiles);
+	//console.log('in register-user, playerProfiles is', playerProfiles);
 	//onlinePlayers = getOnlinePlayers();
 	//console.log('in register-user, online-players is', playerProfiles);
 
@@ -222,24 +231,27 @@ io.on('connection', (socket) => {
 
 	clickedVirus += 1;
 
+	console.log('clickedVirus is now', clickedVirus);
+
 	if(clickedVirus === playerProfiles.length) {
 		clickedVirus = 0;
 		rounds += 1;
 		calcPoints(rounds);
-
+		console.log('clickedVirus inside if after nollställning', clickedVirus);
 		
 	}
 
-	
+	console.log('clickedVirus after if', clickedVirus);
 
   })
 
   socket.on('disconnect', () => {
 	
-	//console.log('socket.id is', socket.id);
+	console.log('someone disconnected');
+	console.log('this is playerProfiles in disconnect', playerProfiles);
 	//console.log('socketId is', playerProfiles[0].socketId);
 
-	if(playerProfiles.length < 0) {
+	if(playerProfiles.length !== 0) {
 		const player = playerProfiles.find(element => element.socketId === socket.id).username;
 
 		//console.log('player is', player);
@@ -260,11 +272,11 @@ io.on('connection', (socket) => {
 		// make sure the player is removed from the list
 		socket.broadcast.emit('online-users', getOnlinePlayers());
 	
-		//console.log('this is online players in disconnect: ', getOnlinePlayers() );
-	}
+		console.log('this is playerProfiles in disconnect where playerprofiles should contain something: ', playerProfiles );
+		}
 	
 	
-  }
+  	}
   
   });
 });

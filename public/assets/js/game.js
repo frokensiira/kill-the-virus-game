@@ -17,6 +17,7 @@ waitingInfo.innerText = 'Waiting for a second player to join...';
 waitingInfo.setAttribute("id", "waiting-text");
 
 let username = null;
+let renderTime = null;
 
 // Functions
 
@@ -26,7 +27,7 @@ const updateOnlinePlayers = (players) => {
 }
 
 
-// Emit events
+// Event listeners
 
 // Handle new player registration
 loginForm.addEventListener('submit', e => {
@@ -107,26 +108,26 @@ socket.on('render-virus', (xy, randomDelay) => {
 
     console.log('randomDealy is', randomDelay);
 
-    let renderTime = null;
+    /* let renderTime = null; */
     setTimeout(() => {
         waitingInfo.remove();
         gameArea.append(virus);
         renderTime = Date.now();
         console.log('Virus rendered', renderTime);
     }, randomDelay)
-    
-    
 
-    virus.addEventListener('click', e => {
-        virus.remove();
-        const clickTime = Date.now();
-        console.log('Virus clicked', clickTime);
+});
 
-        const reactTime = clickTime - renderTime;
-        console.log('reactionTime is', reactTime);
+virus.addEventListener('click', e => {
+    virus.remove();
+    const clickTime = Date.now();
+    console.log('Virus clicked', clickTime);
 
-        socket.emit('reaction-time', reactTime)
-    });00
+    const reactTime = clickTime - renderTime;
+    console.log('reactionTime is', reactTime);
+
+    socket.emit('reaction-time', reactTime)
+    console.log('this is socket', socket);
 });
 
 socket.on('score', (scoreResult, rounds) => {
@@ -134,11 +135,16 @@ socket.on('score', (scoreResult, rounds) => {
     document.querySelector('#player-two-score').innerText = `${scoreResult[1]}`;
     console.log('this is rounds', rounds);
 
-})
+});
+
+socket.on('end-game', (scoreResult) => {
+    alert(`End of game`);
+    socket.emit('disconnect')
+});
 
 socket.on('user-disconnected', username => {
     console.log(`${username} left the game`);
-    alert(`${username} left the game`)
+    alert(`${username} left the game`);
 });
 
 socket.on('room-full', () => {
