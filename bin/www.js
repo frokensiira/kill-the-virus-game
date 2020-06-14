@@ -72,6 +72,8 @@ let clickedVirus = 0;
 
 let rounds = 0;
 
+let playAgain = 0;
+
 // Get usernames of online users
 const getOnlinePlayers = () => {
 
@@ -98,7 +100,7 @@ const calcRandomPosition = measures => {
 }
 
 const calcPoints = (rounds) => {
-	console.log(`In calcpoints: this is ${playerProfiles[0].username}s time: ${playerProfiles[0].reactionTime[rounds-1]}`);
+	//console.log(`In calcpoints: this is ${playerProfiles[0].username}s time: ${playerProfiles[0].reactionTime[rounds-1]}`);
 
 	const time = playerProfiles[0].reactionTime[rounds-1] - playerProfiles[1].reactionTime[rounds-1];
 
@@ -112,18 +114,19 @@ const calcPoints = (rounds) => {
 	}
 
 	const scoreResult = getScore();
-	console.log('this is score result', scoreResult);
-	console.log('this is rounds', rounds);
+	//console.log('this is score result', scoreResult);
+	//console.log('this is rounds', rounds);
 
 	io.emit('score', scoreResult, rounds);
 
-	if(rounds < 10) {
+	if(rounds < 1) {
 		console.log('this is in start-game');
         io.emit('start-game');
     } else {
 		console.log('this is in end-game');
-		io.emit('end-game', scoreResult);
 		rounds = 0;
+		io.emit('end-game', scoreResult, playerProfiles);
+		
 		console.log('rounds after end-game is now', rounds);
 	}
 
@@ -198,6 +201,32 @@ io.on('connection', (socket) => {
 	  io.emit('render-virus', calcRandomPosition(measures), calcRandomDelay());
 	  playerReady = 0;
 	}
+
+  });
+
+  socket.on('play-again', () => {
+	console.log('someone wants to play again, this is playerProfiles', playerProfiles);
+
+	console.log('inside play-again: rounds is', rounds);
+	rounds = 0;
+
+	playAgain += 1;
+
+	// Reset the players score and reactionTimes
+	const player = playerProfiles.find(element => element.socketId === socket.id);
+	player.score = 0;
+	player.reactionTime = [];
+
+	console.log('inside play-again: player is', player);
+
+	if(playAgain === 1) {
+		socket.emit('pOne-new-round', playerProfiles, player);
+	}
+
+	if(playAgain === 2) {
+		io.emit('start-game');
+	}
+
 
   });
 

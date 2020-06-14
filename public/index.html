@@ -61,7 +61,23 @@
             </div>
 
         </div>
-        <div id="game-area"></div>
+        <div id="game-area">
+            <div id="result-container" class="d-none">
+                <h2>Result</h2>
+                <div id="player-result-container">
+                    <div id="player-one-result-container">
+                        <h3 id="player-one-result-heading">My</h3>
+                        <ul id="player-one-result-list"></ul>
+                    </div>
+
+                    <div id="player-two-result-container">
+                        <h3 id="player-two-result-heading">Christoffer</h3>
+                        <ul id="player-two-result-list"></ul>
+                    </div>
+                </div>
+                <button id="play-again">Play again</button>
+            </div>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
