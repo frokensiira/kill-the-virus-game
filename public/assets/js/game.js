@@ -20,7 +20,9 @@ waitingInfo.setAttribute("id", "waiting-text");
 const playAgainBtn = document.querySelector('#play-again');
 
 let username = null;
-let renderTime = null;
+
+ 
+
 
 // Functions
 
@@ -107,38 +109,68 @@ socket.on('start-game', () => {
     
     const measures = {x, y}
 
-    //console.log('this is measures', measures);
-
     socket.emit('set-random-data', measures);    
-    //console.log('this is start-game');
 
 });
 
+let renderTime = null;
+let stoppedTime = null;
+let started = null;
+
+function startStopWatch() {
+    if (renderTime === null) {
+        renderTime = new Date();
+    }
+
+    started = setInterval(function clockRunning(){
+        const currentTime = new Date()
+            , timeElapsed = new Date(currentTime - renderTime)
+            
+
+            , min = timeElapsed.getUTCMinutes()
+            , sec = timeElapsed.getUTCSeconds()
+            , ms = timeElapsed.getUTCMilliseconds();
+    
+        document.querySelector("#player-one-time").innerText = 
+
+            (min > 9 ? min : "0" + min) + ":" + 
+            (sec > 9 ? sec : "0" + sec) + ":" + 
+            (ms > 99 ? ms : ms > 9 ? "0" + ms : "00" + ms);
+    }, 10);	
+}
+
+function stopStopWatch() {
+    stoppedTime = new Date();
+    clearInterval(started);
+}
+
+
 socket.on('render-virus', (xy, randomDelay) => {
 
-    console.log('rendering the virus');
     virus.style.top = xy[0] + 'px';
     virus.style.left = xy[1] + 'px';
 
-    //console.log('randomDealy is', randomDelay);
-
-    /* let renderTime = null; */
     setTimeout(() => {
         waitingInfo.remove();
         gameArea.append(virus);
-        renderTime = Date.now();
-        console.log('Virus rendered', renderTime);
+        //renderTime = Date.now();
+        startStopWatch();
+        
+        //console.log('Virus rendered', renderTime);
     }, randomDelay)
 
 });
 
 virus.addEventListener('click', e => {
-    virus.remove();
-    const clickTime = Date.now();
-    //console.log('Virus clicked', clickTime);
+    stopStopWatch();
 
-    const reactTime = clickTime - renderTime;
-    //console.log('reactionTime is', reactTime);
+    virus.remove();
+
+    // Get the calculated time from stopwatch and transform it to a number for server to process
+    const timeString = document.querySelector("#player-one-time").innerText;
+    const reactTime = Number(timeString.replaceAll(':', ''));
+
+    console.log('reactTime is', reactTime);
 
     socket.emit('reaction-time', reactTime)
     //console.log('this is socket', socket);
@@ -147,7 +179,7 @@ virus.addEventListener('click', e => {
 socket.on('score', (scoreResult, rounds) => {
     document.querySelector('#player-one-score').innerText = `${scoreResult[0]}`;
     document.querySelector('#player-two-score').innerText = `${scoreResult[1]}`;
-    console.log('this is rounds', rounds);
+    //console.log('this is rounds', rounds);
 
 });
 
@@ -193,10 +225,12 @@ socket.on('pOne-new-round', (playerProfiles, player) => {
     }
 
     gameArea.append(waitingInfo);
+});
+
+socket.on('reset-scoreboard', () => {
     document.querySelector('#player-one-score').innerText = `0`;
     document.querySelector('#player-two-score').innerText = `0`;
-
-});
+})
 
 socket.on('user-disconnected', username => {
     console.log(`${username} left the game`);
