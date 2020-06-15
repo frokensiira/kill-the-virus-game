@@ -56,9 +56,9 @@ const calcPoints = function(io, rounds) {
 	//console.log('this is score result', scoreResult);
 	//console.log('this is rounds', rounds);
 
-	io.emit('score', scoreResult, rounds);
+	io.emit('score', scoreResult, rounds, playerProfiles);
 
-	if(rounds < 1) {
+	if(rounds < 2) {
 		console.log('this is in start-game');
         io.emit('start-game');
     } else {
@@ -131,7 +131,23 @@ module.exports = function(socket) {
 
   });
 
+  //new experimental
   socket.on('set-random-data', function(measures) {
+	//console.log('in set random-data');
+
+  const onlinePlayers = getOnlinePlayers();
+
+  playerReady += 1;
+
+  if(playerReady === onlinePlayers.length) {
+	io.emit('render-virus', calcRandomPosition(measures), calcRandomDelay(), playerProfiles);
+	playerReady = 0;
+  }
+
+});
+
+  // old
+  /* socket.on('set-random-data', function(measures) {
 	  //console.log('in set random-data');
 
 	const onlinePlayers = getOnlinePlayers();
@@ -143,7 +159,7 @@ module.exports = function(socket) {
 	  playerReady = 0;
 	}
 
-  });
+  }); */
 
   socket.on('play-again', function() {
 	console.log('someone wants to play again, this is playerProfiles', playerProfiles);
@@ -208,6 +224,9 @@ module.exports = function(socket) {
 	
 		// reset playerReady
 		playerReady = 0;
+
+		// reset rounds
+		rounds = 0;
 		
 		// make sure the player is removed from the list
 		socket.broadcast.emit('online-users', getOnlinePlayers());

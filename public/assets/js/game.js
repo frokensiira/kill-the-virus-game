@@ -19,10 +19,9 @@ waitingInfo.setAttribute("id", "waiting-text");
 
 const playAgainBtn = document.querySelector('#play-again');
 
+let onlineProfiles = [];
+
 let username = null;
-
- 
-
 
 // Functions
 
@@ -117,10 +116,15 @@ let renderTime = null;
 let stoppedTime = null;
 let started = null;
 
-function startStopWatch() {
+function startStopWatch(playerProfiles) {
     if (renderTime === null) {
         renderTime = new Date();
     }
+
+    onlineProfiles = playerProfiles
+
+    //console.log('inside first startstopwatch, playerProfiles is', playerProfiles);
+    //console.log('this is socket id', socket.id);
 
     started = setInterval(function clockRunning(){
         const currentTime = new Date()
@@ -130,12 +134,25 @@ function startStopWatch() {
             , min = timeElapsed.getUTCMinutes()
             , sec = timeElapsed.getUTCSeconds()
             , ms = timeElapsed.getUTCMilliseconds();
-    
-        document.querySelector("#player-one-time").innerText = 
 
-            (min > 9 ? min : "0" + min) + ":" + 
-            (sec > 9 ? sec : "0" + sec) + ":" + 
-            (ms > 99 ? ms : ms > 9 ? "0" + ms : "00" + ms);
+            //console.log('inside startStopwatch, playerProfiles is', playerProfiles);
+
+    
+            if(onlineProfiles[0].socketId === socket.id) {
+                document.querySelector("#player-one-time").innerText = 
+
+                (min > 9 ? min : "0" + min) + ":" + 
+                (sec > 9 ? sec : "0" + sec) + ":" + 
+                (ms > 99 ? ms : ms > 9 ? "0" + ms : "00" + ms);
+            } else {
+                document.querySelector("#player-two-time").innerText = 
+
+                (min > 9 ? min : "0" + min) + ":" + 
+                (sec > 9 ? sec : "0" + sec) + ":" + 
+                (ms > 99 ? ms : ms > 9 ? "0" + ms : "00" + ms);
+            }
+    
+        
     }, 10);	
 }
 
@@ -144,8 +161,8 @@ function stopStopWatch() {
     clearInterval(started);
 }
 
-
-socket.on('render-virus', (xy, randomDelay) => {
+// new experimental
+socket.on('render-virus', (xy, randomDelay, playerProfiles) => {
 
     virus.style.top = xy[0] + 'px';
     virus.style.left = xy[1] + 'px';
@@ -153,13 +170,26 @@ socket.on('render-virus', (xy, randomDelay) => {
     setTimeout(() => {
         waitingInfo.remove();
         gameArea.append(virus);
-        //renderTime = Date.now();
-        startStopWatch();
-        
-        //console.log('Virus rendered', renderTime);
+        startStopWatch(playerProfiles);
     }, randomDelay)
 
+    console.log('online player is', playerProfiles);
+
 });
+
+// old
+/* socket.on('render-virus', (xy, randomDelay) => {
+
+    virus.style.top = xy[0] + 'px';
+    virus.style.left = xy[1] + 'px';
+
+    setTimeout(() => {
+        waitingInfo.remove();
+        gameArea.append(virus);
+        startStopWatch();
+    }, randomDelay)
+
+}); */
 
 virus.addEventListener('click', e => {
     stopStopWatch();
@@ -167,18 +197,34 @@ virus.addEventListener('click', e => {
     virus.remove();
 
     // Get the calculated time from stopwatch and transform it to a number for server to process
-    const timeString = document.querySelector("#player-one-time").innerText;
-    const reactTime = Number(timeString.replaceAll(':', ''));
 
-    console.log('reactTime is', reactTime);
+    if(onlineProfiles[0].socketId === socket.id) {
+        const timeString = document.querySelector("#player-one-time").innerText;
+        const reactTime = Number(timeString.replaceAll(':', ''));
+        socket.emit('reaction-time', reactTime);
+    } else if (onlineProfiles[1].socketId === socket.id) {
+        const timeString = document.querySelector("#player-two-time").innerText;
+        const reactTime = Number(timeString.replaceAll(':', ''));
+        socket.emit('reaction-time', reactTime);
+    } else {
+        console.log('something unexpected happened');
+    }
+    
+    //console.log('reactTime is', reactTime);
 
-    socket.emit('reaction-time', reactTime)
+    
     //console.log('this is socket', socket);
 });
 
-socket.on('score', (scoreResult, rounds) => {
+socket.on('score', (scoreResult, rounds, playerProfiles) => {
+
+    console.log('this is rounds', rounds);
+    console.log('this is playerprofiles', playerProfiles);
     document.querySelector('#player-one-score').innerText = `${scoreResult[0]}`;
     document.querySelector('#player-two-score').innerText = `${scoreResult[1]}`;
+
+    document.querySelector("#player-one-time").innerText = `${playerProfiles[0].reactionTime[rounds-1]}`
+    document.querySelector("#player-two-time").innerText = `${playerProfiles[1].reactionTime[rounds-1]}`
     //console.log('this is rounds', rounds);
 
 });
@@ -200,7 +246,9 @@ socket.on('end-game', (scoreResult, playerProfiles) => {
         console.log("It's a tie!");
     }
 
-    console.log('this is playerProfiles', playerProfiles);
+    
+
+    //console.log('this is playerProfiles', playerProfiles);
     //socket.emit('disconnect')
 });
 
@@ -230,6 +278,8 @@ socket.on('pOne-new-round', (playerProfiles, player) => {
 socket.on('reset-scoreboard', () => {
     document.querySelector('#player-one-score').innerText = `0`;
     document.querySelector('#player-two-score').innerText = `0`;
+    document.querySelector("#player-one-time").innerText = `0`
+    document.querySelector("#player-two-time").innerText = `0`
 })
 
 socket.on('user-disconnected', username => {
