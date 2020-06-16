@@ -97,13 +97,14 @@ socket.on('new-user-connected', username => {
 
 });
 
-  
+
 socket.on('start-game', () => {
 
+    console.log('virus.clientHeight is', virus.clientHeight);
     // Adding temporary virus to get measures, then remove it
     gameArea.append(virus);
-    const x = gameArea.offsetHeight-virus.offsetHeight;
-    const y = gameArea.offsetWidth-virus.offsetWidth;
+    const x = gameArea.offsetHeight-virus.clientHeight;
+    const y = gameArea.offsetWidth-virus.clientWidth;
     virus.remove();
     
     const measures = {x, y}
@@ -111,7 +112,7 @@ socket.on('start-game', () => {
     socket.emit('set-random-data', measures);    
 
 });
-
+  
 let renderTime = null;
 let stoppedTime = null;
 let started = null;

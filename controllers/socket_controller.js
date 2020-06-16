@@ -194,7 +194,34 @@ module.exports = function(socket) {
 	console.log('someone disconnected');
 	console.log('this is playerProfiles in disconnect', playerProfiles);
 
-	if(playerProfiles.length !== 0) {
+	if(socket.id) {
+		const player = playerProfiles.find(element => element.socketId === socket.id).username;
+	
+		debug(`${player} left the game :(`);
+	
+		// let the player know that the other player left the game
+		if (player) {
+		  socket.broadcast.emit('user-disconnected', player);
+		
+		// remove player 
+		const playerIndex = playerProfiles.findIndex(element => element.socketId === socket.id);
+		playerProfiles.splice(playerIndex);
+	
+		// reset playerReady
+		playerReady = 0;
+
+		// reset rounds
+		rounds = 0;
+		
+		// make sure the player is removed from the list
+		socket.broadcast.emit('online-users', getOnlinePlayers());
+	
+		console.log('this is playerProfiles in disconnect: ', playerProfiles );
+		}
+
+  	}
+
+/* 	if(playerProfiles.length !== 0 && socket.id) {
 		const player = playerProfiles.find(element => element.socketId === socket.id).username;
 	
 		debug(`${player} left the game :(`);
@@ -219,7 +246,7 @@ module.exports = function(socket) {
 		console.log('this is playerProfiles in disconnect where playerprofiles should contain something: ', playerProfiles );
 		}
 
-  	}
+  	} */
   
   });
 };
