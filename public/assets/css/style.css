@@ -244,6 +244,10 @@ img {
     font-size: 2rem;
 }
 
+#result-container p{
+    font-size: 2rem;
+}
+
 button#play-again {
     border-radius: 20px 20px 20px 20px;
     background-image: linear-gradient(-180deg, #FF89D6 0%, #C01F9E 100%);

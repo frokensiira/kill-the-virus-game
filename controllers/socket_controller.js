@@ -41,28 +41,19 @@ const calcPoints = function(io, rounds) {
 
 	if(time < 0) {
 		playerProfiles[0].score += 1;
-		console.log(`${playerProfiles[0].username} got 1 point`);
 		
 	} else {
 		playerProfiles[1].score += 1;
-		console.log(`${playerProfiles[1].username} got 1 point`);
 	}
 
 	const scoreResult = getScore();
-	//console.log('this is score result', scoreResult);
-	//console.log('this is rounds', rounds);
 
 	io.emit('score', scoreResult, rounds, playerProfiles);
 
-	if(rounds < 5) {
-		console.log('this is in start-game');
+	if(rounds < 2) {
         io.emit('start-game');
     } else {
-		console.log('this is in end-game');
-		rounds = 0;
 		io.emit('end-game', scoreResult, playerProfiles);
-		
-		console.log('rounds after end-game is now', rounds);
 	}
 
 }
@@ -71,151 +62,153 @@ module.exports = function(socket) {
 
 	const io = this;
 
-	debug('A client connected!');
-
-  /**
-  * Handle a new player
-  */
+	/**
+	 * Handle a new player
+	 */
    
-  socket.on('register-user', function(username, cb) {
-    debug("User '%s' connected to the game", username);
-	console.log('playerProfiles is', playerProfiles);
-    // before registering a new player, check that the room isn't already full
-	let onlinePlayers = getOnlinePlayers();
-	
-    if(onlinePlayers.length > 1 ) {
-      socket.emit('room-full');
-      return;
-    }
+	socket.on('register-user', function(username, cb) {
 
-    // add a check here to make sure the username is not already taken. Compare onlinePlayers with username. //
-	
-	// create player
-	playerProfile = {
-		socketId: socket.id,
-		username,
-		reactionTime: [],
-		score: 0,
-	}
-
-	playerProfiles.push(playerProfile);
-
-	const responseData = {
-		playerOne: false,
-		joinGame: true,
-		usernameInUse: false,
-		onlinePlayers: getOnlinePlayers(),
-	}
-      
-	// check if the room is empty, i.e. registered user is the first to join
-	if(onlinePlayers.length === 0 ) {
-		responseData.playerOne = true;
-	}
-
-	cb(responseData);
-
-    
-    // if there already is a player waiting, let her/him know that a new player joined and start the game
-    if(onlinePlayers.length === 1 ) {
-      socket.broadcast.emit('new-user-connected', username);
-
-	  io.emit('start-game');
-    }
-
-    // add new user to the other player's player list as well
-	  socket.broadcast.emit('online-users', getOnlinePlayers());
-
-  });
-
-
-  socket.on('set-random-data', function(measures) {
-
-
-	const onlinePlayers = getOnlinePlayers();
-
-	playerReady += 1;
-
-	if(playerReady === onlinePlayers.length) {
-	io.emit('render-virus', calcRandomPosition(measures), calcRandomDelay(), playerProfiles);
-	playerReady = 0;
-	}
-
-});
-
-  socket.on('play-again', function() {
-	console.log('someone wants to play again, this is playerProfiles', playerProfiles);
-
-	console.log('inside play-again: rounds is', rounds);
-	rounds = 0;
-
-	playAgain += 1;
-
-	// Reset the players score and reactionTimes
-	const player = playerProfiles.find(element => element.socketId === socket.id);
-	player.score = 0;
-	player.reactionTime = [];
-
-	console.log('inside play-again: player is', player);
-
-	if(playAgain === 1) {
-		socket.emit('pOne-new-round', playerProfiles, player);
-	}
-
-	if(playAgain === 2) {
-		io.emit('reset-scoreboard')
-		io.emit('start-game');
-	}
-
-
-  });
-
-  socket.on('reaction-time', function(reactTime) {
-	
-	const player = playerProfiles.find(player => player.socketId === socket.id);
-
-	player.reactionTime.push(reactTime);
-
-	clickedVirus += 1;
-
-	if(clickedVirus === playerProfiles.length) {
-		clickedVirus = 0;
-		rounds += 1;
-		calcPoints(io, rounds);		
-	}
-
-  })
-
-  socket.on('disconnect', function() {
-	
-	console.log('someone disconnected with socket id', socket.id);
-	console.log('this is playerProfiles in disconnect', playerProfiles);
-
-	if(playerProfiles.length !== 0 && socket.id) {
-		const player = playerProfiles.find(element => element.socketId === socket.id).username;
-	
-		debug(`${player} left the game :(`);
-	
-		// let the player know that the other player left the game
-		if (player) {
-		  socket.broadcast.emit('user-disconnected', player);
-		
-		// remove player 
-		const playerIndex = playerProfiles.findIndex(element => element.socketId === socket.id);
-		playerProfiles.splice(playerIndex);
-	
-		// reset playerReady
-		playerReady = 0;
-
-		// reset rounds
-		rounds = 0;
-		
-		// make sure the player is removed from the list
-		socket.broadcast.emit('online-users', getOnlinePlayers());
-	
-		console.log('this is playerProfiles in disconnect where playerprofiles should contain something: ', playerProfiles );
+		// before registering a new player, check that the room isn't already full
+		if(playerProfiles.length > 1 ) {
+			socket.emit('room-full');
+			return;
 		}
 
-  	}
-  
-  });
+		// create player
+		playerProfile = {
+			socketId: socket.id,
+			username,
+			reactionTime: [],
+			score: 0,
+		}
+
+		// add the player to server player list
+		playerProfiles.push(playerProfile);
+
+		// create a response object
+		const responseData = {
+			playerOne: false,
+			joinGame: true,
+			playerOne: false,
+			onlinePlayers: getOnlinePlayers(),
+		}
+			
+		// check if the user is the first to be registered
+		if(playerProfiles.length === 1 ) {
+			responseData.playerOne = true;
+		}
+
+		// send the response object to the client
+		cb(responseData);
+
+		// check if the user is the second one to be registered 
+		if(playerProfiles.length === 2 ) {
+
+			// let the other user know that a new player joined
+			socket.broadcast.emit('new-user-connected', username);
+
+			// start the game
+			io.emit('start-game');
+		}
+
+		// add new user to the other player's player list as well
+		socket.broadcast.emit('online-users', getOnlinePlayers());
+
+	});
+
+	socket.on('set-random-data', function(measures) {
+
+		// check if both players are ready to play
+		playerReady += 1;
+
+		if(playerReady === playerProfiles.length) {
+			io.emit('render-virus', calcRandomPosition(measures), calcRandomDelay(), playerProfiles);
+			playerReady = 0;
+		}
+
+	});
+
+	socket.on('play-again', function() {
+
+		// Reset the players score and reactionTimes
+		const player = playerProfiles.find(element => element.socketId === socket.id);
+		player.score = 0;
+		player.reactionTime = [];
+		rounds = 0;
+
+		
+		playAgain += 1;
+
+		if(playAgain === 1) {
+			socket.emit('new-round', playerProfiles, player);
+		}
+
+		// check that both players want to play before starting a new game
+		if(playAgain === 2) {
+			io.emit('reset-scoreboard');
+			socket.broadcast.emit('new-user-connected', player.username);
+			io.emit('start-game');
+
+			playAgain = 0;
+		}
+
+
+	});
+
+	socket.on('reaction-time', function(reactTime) {
+
+		// add the reaction time to the players list
+		const player = playerProfiles.find(player => player.socketId === socket.id);
+		player.reactionTime.push(reactTime);
+
+		// check that both players have clicked the virus before calculating the scores
+		clickedVirus += 1;
+
+		if(clickedVirus === playerProfiles.length) {
+			clickedVirus = 0;
+			rounds += 1;
+			calcPoints(io, rounds);		
+		}
+
+	});
+ 
+	socket.on('get-players', function(cb) {
+		cb(playerProfiles);
+	});
+
+	socket.on('disconnect', function() {
+
+		// check if player is registered
+		const playerIsRegistered = playerProfiles.find(element => element.socketId === socket.id);
+
+		if(playerIsRegistered) {
+
+			// find the player that disconnected
+			const player = playerProfiles.find(element => element.socketId === socket.id).username;
+
+			// let the other player that stayed know that the this player left the game 
+			if (player) {
+
+				// only broadcast if there are more than one player
+				if(playerProfiles.length > 1) {
+					socket.broadcast.emit('user-disconnected', player);
+				}
+			 
+				// remove player from server list
+				const playerIndex = playerProfiles.findIndex(element => element.socketId === socket.id);
+				playerProfiles.splice(playerIndex, 1);
+
+				// reset 
+				playerReady = 0;
+				rounds = 0;
+				playAgain = 0;
+				
+				// ask the client to remove the player from the player list
+				socket.broadcast.emit('online-users', getOnlinePlayers());
+
+			}
+
+		}
+
+	});
 };
