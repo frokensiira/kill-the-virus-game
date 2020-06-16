@@ -118,9 +118,6 @@ let stoppedTime = null;
 let started = null;
 
 function startStopWatch(playerProfiles) {
-    if (renderTime === null) {
-        renderTime = new Date();
-    }
 
     onlineProfiles = playerProfiles
 
@@ -165,10 +162,18 @@ socket.on('render-virus', (xy, randomDelay, playerProfiles) => {
     setTimeout(() => {
         waitingInfo.remove();
         gameArea.append(virus);
+        if(playerProfiles[0].socketId === socket.id){
+            document.querySelector("#player-two-time").innerText = '00.00.000';
+        } else if (playerProfiles[1].socketId === socket.id){
+            document.querySelector("#player-one-time").innerText = '00.00.000';
+        }
+        renderTime = new Date();
         startStopWatch(playerProfiles);
     }, randomDelay)
 
     console.log('online player is', playerProfiles);
+
+    
 
 });
 

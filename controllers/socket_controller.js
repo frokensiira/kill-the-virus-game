@@ -16,9 +16,7 @@ let playAgain = 0;
 
 // Get usernames of online users
 const getOnlinePlayers = function() {
-
 	return playerProfiles.map(player => player.username);
-   
 }
 
 const getScore = function() {
@@ -26,9 +24,7 @@ const getScore = function() {
 }
 
 const calcRandomDelay = function() {
-
-	const x = Math.floor(Math.random() * (3000 - 500) + 500);
-	return x;
+	return Math.floor(Math.random() * (3000 - 500) + 500);
 }
 
 const calcRandomPosition = function(measures) {
@@ -58,7 +54,7 @@ const calcPoints = function(io, rounds) {
 
 	io.emit('score', scoreResult, rounds, playerProfiles);
 
-	if(rounds < 2) {
+	if(rounds < 5) {
 		console.log('this is in start-game');
         io.emit('start-game');
     } else {
@@ -133,16 +129,16 @@ module.exports = function(socket) {
 
 
   socket.on('set-random-data', function(measures) {
-	//console.log('in set random-data');
 
-  const onlinePlayers = getOnlinePlayers();
 
-  playerReady += 1;
+	const onlinePlayers = getOnlinePlayers();
 
-  if(playerReady === onlinePlayers.length) {
+	playerReady += 1;
+
+	if(playerReady === onlinePlayers.length) {
 	io.emit('render-virus', calcRandomPosition(measures), calcRandomDelay(), playerProfiles);
 	playerReady = 0;
-  }
+	}
 
 });
 
@@ -191,37 +187,10 @@ module.exports = function(socket) {
 
   socket.on('disconnect', function() {
 	
-	console.log('someone disconnected');
+	console.log('someone disconnected with socket id', socket.id);
 	console.log('this is playerProfiles in disconnect', playerProfiles);
 
-	if(socket.id) {
-		const player = playerProfiles.find(element => element.socketId === socket.id).username;
-	
-		debug(`${player} left the game :(`);
-	
-		// let the player know that the other player left the game
-		if (player) {
-		  socket.broadcast.emit('user-disconnected', player);
-		
-		// remove player 
-		const playerIndex = playerProfiles.findIndex(element => element.socketId === socket.id);
-		playerProfiles.splice(playerIndex);
-	
-		// reset playerReady
-		playerReady = 0;
-
-		// reset rounds
-		rounds = 0;
-		
-		// make sure the player is removed from the list
-		socket.broadcast.emit('online-users', getOnlinePlayers());
-	
-		console.log('this is playerProfiles in disconnect: ', playerProfiles );
-		}
-
-  	}
-
-/* 	if(playerProfiles.length !== 0 && socket.id) {
+	if(playerProfiles.length !== 0 && socket.id) {
 		const player = playerProfiles.find(element => element.socketId === socket.id).username;
 	
 		debug(`${player} left the game :(`);
@@ -246,7 +215,7 @@ module.exports = function(socket) {
 		console.log('this is playerProfiles in disconnect where playerprofiles should contain something: ', playerProfiles );
 		}
 
-  	} */
+  	}
   
   });
 };

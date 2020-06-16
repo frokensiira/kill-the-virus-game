@@ -60,31 +60,6 @@ body {
     border-radius: 10px 10px 10px 10px;
 }
 
-/* #waiting-room {
-    height: 100vh;
-    background: url('../images/waiting-background.jpg') no-repeat center center fixed; 
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-    
-} */
-
-/* .filter {
-     
-    -webkit-filter: hue-rotate(180deg);
-
-        -moz-filter: hue-rotate(180deg);
-
-        -o-filter: hue-rotate(180deg);
-
-        filter: hue-rotate(180deg);
-} */
-/* #waiting-room h1{
-    text-align: center;
-    color: white;
-} */
-
 /* Scoreboard */
 
 #score-board-menu {
