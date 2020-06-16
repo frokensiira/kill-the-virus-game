@@ -123,9 +123,6 @@ function startStopWatch(playerProfiles) {
 
     onlineProfiles = playerProfiles
 
-    //console.log('inside first startstopwatch, playerProfiles is', playerProfiles);
-    //console.log('this is socket id', socket.id);
-
     started = setInterval(function clockRunning(){
         const currentTime = new Date()
             , timeElapsed = new Date(currentTime - renderTime)
@@ -134,8 +131,6 @@ function startStopWatch(playerProfiles) {
             , min = timeElapsed.getUTCMinutes()
             , sec = timeElapsed.getUTCSeconds()
             , ms = timeElapsed.getUTCMilliseconds();
-
-            //console.log('inside startStopwatch, playerProfiles is', playerProfiles);
 
     
             if(onlineProfiles[0].socketId === socket.id) {
@@ -161,7 +156,6 @@ function stopStopWatch() {
     clearInterval(started);
 }
 
-// new experimental
 socket.on('render-virus', (xy, randomDelay, playerProfiles) => {
 
     virus.style.top = xy[0] + 'px';
@@ -177,19 +171,6 @@ socket.on('render-virus', (xy, randomDelay, playerProfiles) => {
 
 });
 
-// old
-/* socket.on('render-virus', (xy, randomDelay) => {
-
-    virus.style.top = xy[0] + 'px';
-    virus.style.left = xy[1] + 'px';
-
-    setTimeout(() => {
-        waitingInfo.remove();
-        gameArea.append(virus);
-        startStopWatch();
-    }, randomDelay)
-
-}); */
 
 virus.addEventListener('click', e => {
     stopStopWatch();
@@ -210,10 +191,6 @@ virus.addEventListener('click', e => {
         console.log('something unexpected happened');
     }
     
-    //console.log('reactTime is', reactTime);
-
-    
-    //console.log('this is socket', socket);
 });
 
 socket.on('score', (scoreResult, rounds, playerProfiles) => {
@@ -230,7 +207,7 @@ socket.on('score', (scoreResult, rounds, playerProfiles) => {
 });
 
 socket.on('end-game', (scoreResult, playerProfiles) => {
-    //alert(`End of game`);
+
     console.log('this is scoreResult', scoreResult);
     
     resultContainer.classList.remove('d-none');

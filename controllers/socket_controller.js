@@ -131,7 +131,7 @@ module.exports = function(socket) {
 
   });
 
-  //new experimental
+
   socket.on('set-random-data', function(measures) {
 	//console.log('in set random-data');
 
@@ -145,21 +145,6 @@ module.exports = function(socket) {
   }
 
 });
-
-  // old
-  /* socket.on('set-random-data', function(measures) {
-	  //console.log('in set random-data');
-
-	const onlinePlayers = getOnlinePlayers();
-
-    playerReady += 1;
-
-    if(playerReady === onlinePlayers.length) {
-	  io.emit('render-virus', calcRandomPosition(measures), calcRandomDelay());
-	  playerReady = 0;
-	}
-
-  }); */
 
   socket.on('play-again', function() {
 	console.log('someone wants to play again, this is playerProfiles', playerProfiles);
