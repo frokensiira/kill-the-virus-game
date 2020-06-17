@@ -61,7 +61,7 @@ const calcPoints = function(io, rounds) {
 
 	io.emit('score', scoreResult, rounds, playerProfiles);
 
-	if(rounds < 2) {
+	if(rounds < 10) {
         io.emit('start-game');
     } else {
 		io.emit('end-game', scoreResult, playerProfiles);
@@ -127,18 +127,6 @@ module.exports = function(socket) {
 
 	});
 
-	/* socket.on('set-random-data', function(measures) {
-
-		// check if both players are ready to play
-		playerReady += 1;
-
-		if(playerReady === playerProfiles.length) {
-			io.emit('render-virus', calcRandomPosition(measures), calcRandomDelay(), playerProfiles);
-			playerReady = 0;
-		}
-
-	}); */
-
 	socket.on('set-random-data', function(x,y) {
 
 		xArray.push(x);
@@ -148,7 +136,7 @@ module.exports = function(socket) {
 		playerReady += 1;
 
 		if(playerReady === playerProfiles.length) {
-			
+
 			//calculate the smallest measures to send for randomization
 			const minX = Math.min(...xArray);
 			const minY = Math.min(...yArray);
