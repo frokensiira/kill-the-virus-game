@@ -28,14 +28,6 @@ const calcRandomDelay = function() {
 	return Math.floor(Math.random() * (3000 - 500) + 500);
 }
 
-/* const calcRandomPosition = function(measures) {
-  
-	const randomX = Math.floor(Math.random()*measures.x);
-	const randomY = Math.floor(Math.random()*measures.y);
-	
-	return [randomX,randomY];
-} */
-
 const calcRandomPosition = function(x,y) {
   
 	const randomX = Math.floor(Math.random()*x);
@@ -59,7 +51,7 @@ const calcPoints = function(io, rounds) {
 
 	io.emit('score', scoreResult, rounds, playerProfiles);
 
-	if(rounds < 2) {
+	if(rounds < 10) {
         io.emit('start-game');
     } else {
 		io.emit('end-game', scoreResult, playerProfiles);
