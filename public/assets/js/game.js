@@ -41,8 +41,8 @@ const updateOnlinePlayers = (players) => {
 const resetScoreboard = () => {
     playerOneScore.innerText = `0`;
     playerTwoScore.innerText = `0`;
-    playerOneTime.innerText = `0`;
-    playerTwoTime.innerText = `0`;
+    playerOneTime.innerText = `00:00:00`;
+    playerTwoTime.innerText = `00:00:00`;
 };
 
 // send out info 
