@@ -51,7 +51,7 @@ const calcPoints = function(io, rounds) {
 
 	io.emit('score', scoreResult, rounds, playerProfiles);
 
-	if(rounds < 10) {
+	if(rounds < 2) {
         io.emit('start-game');
     } else {
 		io.emit('end-game', scoreResult, playerProfiles);

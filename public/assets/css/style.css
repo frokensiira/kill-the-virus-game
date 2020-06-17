@@ -11,6 +11,12 @@
 body {
     height: 100vh;
     background-color: #1D2F57;
+
+    background: url('../images/background-gamearea.jpg') no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
 }
 
 /* First page */
@@ -51,7 +57,7 @@ body {
 
 #board-wrapper {
     background-color: #349697;
-    height: 80%;
+    /* height: 80%; */
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -71,7 +77,6 @@ body {
     0 0.25rem 0.5rem 0 rgb(227, 111, 100) inset;
 
     border: 1px solid #012880;
-/*     border-radius: 0px 0px 10px 10px; */
 
     color: rgba(11, 2, 43);
 }
@@ -83,6 +88,7 @@ body {
 #board-wrapper li {
     list-style-type: none;
     font-size: 2rem;
+    padding: 0.4rem;
 }
 
 #players-wrapper {
@@ -152,16 +158,20 @@ span.fa-user {
     height: 85vh;
     width: 100vw;
     position: relative;
+    
 }
 
 #info-container {
     width: 80%;
+    margin: 0 auto;
+    padding-top: 5rem;
 }
 
 #waiting-text {
-    color: white;
+    color: rgba(11, 2, 43);
+    font-weight: bold;
+    font-size: 3rem;
     text-align: center;
-    margin-top: 5rem;
 }
 
 #virus {
@@ -179,15 +189,14 @@ img {
     justify-content: space-evenly;
     align-items: center;
 
-
-    height: 600px;
-    width: 600px;
-    background-color: rgb(236, 233, 233);
+    max-width: 700px;
+    background-color: #D9EDEE;
     box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
     border-radius: 10px 10px 10px 10px;
 
     margin: 0 auto;
     margin-top: 3rem;
+    padding: 3rem;
 
     color: rgba(11, 2, 43);
     font-family: 'Anton', sans-serif;
@@ -197,8 +206,8 @@ img {
     display: flex;
     justify-content: space-around;
     align-items: center;
-
     width: 80%;
+    padding: 2rem;
 }
 
 #result-container ul{
