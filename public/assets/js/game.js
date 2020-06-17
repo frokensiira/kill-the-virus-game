@@ -49,74 +49,8 @@ const resetScoreboard = () => {
 const info = (text = 'Waiting for a second player to join...') => {
     waitingInfo.innerText = text;
     waitingInfo.setAttribute("id", "waiting-text");
-    gameArea.append(waitingInfo);
+    document.querySelector('#info-container').append(waitingInfo);
 }
-
-// Event listeners
-
-// Handle new player registration
-document.querySelector('#login-form').addEventListener('submit', e => {
-    e.preventDefault();
-
-    username = document.querySelector('#username').value;
-    socket.emit('register-user', username, (status) => {
-
-        // if ok from server
-        if(status.joinGame){
-            // "send" player to game
-            start.classList.add('d-none');
-            game.classList.remove('d-none');
-
-            // and update the player list
-            updateOnlinePlayers(status.onlinePlayers);
-        }
-
-        if(status.playerOne){
-            info();
-        }
-
-        return;
-    });
-    
-});
-
-
-//Listen for events
-
-/* socket.on('reconnect', () => {
-	if(username) {
-		socket.emit('register-user', username, () => {
-			console.log("Server acknowledged our reconnect :)");
-		})
-	}
-}); */
-
-// add new user to the other player's player list as well
-socket.on('online-users', users => {
-	updateOnlinePlayers(users)
-});
-
-// let player 1 know who joined the game
-socket.on('new-user-connected', username => {
-    info(`${username} joined the game. Prepare for virus extinction 😱`);
-});
-
-
-socket.on('start-game', () => {
-
-    // Adding temporary virus to get measures, then remove it
-    gameArea.append(virus);
-    const x = gameArea.offsetHeight-virus.clientHeight;
-    const y = gameArea.offsetWidth-virus.clientWidth;
-    virus.remove();
-    
-    const measures = {x, y}
-
-    // send measures to server for randomization
-    socket.emit('set-random-data', measures);    
-
-});
-
 
 const startStopWatch = (playerProfiles) => {
 
@@ -153,25 +87,33 @@ const stopStopWatch = () => {
     clearInterval(started);
 }
 
-socket.on('render-virus', (xy, randomDelay, playerProfiles) => {
+// Event listeners
 
-    virus.style.top = xy[0] + 'px';
-    virus.style.left = xy[1] + 'px';
+// Handle new player registration
+document.querySelector('#login-form').addEventListener('submit', e => {
+    e.preventDefault();
 
-    setTimeout(() => {
-        waitingInfo.remove();
-        gameArea.append(virus);
-        if(playerProfiles[0].socketId === socket.id){
-            playerTwoTime.innerText = '00.00.000';
-        } else if (playerProfiles[1].socketId === socket.id){
-            playerOneTime.innerText = '00.00.000';
+    username = document.querySelector('#username').value;
+    socket.emit('register-user', username, (status) => {
+
+        // if ok from server
+        if(status.joinGame){
+            // "send" player to game
+            start.classList.add('d-none');
+            game.classList.remove('d-none');
+
+            // and update the player list
+            updateOnlinePlayers(status.onlinePlayers);
         }
-        renderTime = new Date();
-        startStopWatch(playerProfiles);
-    }, randomDelay)
 
+        if(status.playerOne){
+            info();
+        }
+
+        return;
+    });
+    
 });
-
 
 virus.addEventListener('click', e => {
     stopStopWatch();
@@ -192,6 +134,60 @@ virus.addEventListener('click', e => {
             console.log('something unexpected happened');
         }
     });
+
+});
+
+playAgainBtn.addEventListener('click', e => {
+    resultContainer.classList.add('d-none');
+    socket.emit('play-again');
+});
+
+
+//Listen for events from server
+
+// add new user to the other player's player list as well
+socket.on('online-users', users => {
+	updateOnlinePlayers(users)
+});
+
+// let player 1 know who joined the game
+socket.on('new-user-connected', username => {
+    info(`${username} joined the game. Prepare for virus extinction 😱`);
+});
+
+socket.on('start-game', () => {
+
+    // Adding temporary virus to get measures, then remove it
+    gameArea.append(virus);
+    const x = gameArea.offsetHeight-virus.clientHeight;
+    const y = gameArea.offsetWidth-virus.clientWidth;
+    virus.remove();
+
+    socket.emit('set-random-data', x, y); 
+    
+    //const measures = {x, y}
+
+    // send measures to server for randomization
+    //socket.emit('set-random-data', measures);    
+
+});
+
+socket.on('render-virus', (xy, randomDelay, playerProfiles) => {
+
+    virus.style.top = xy[0] + 'px';
+    virus.style.left = xy[1] + 'px';
+
+    setTimeout(() => {
+        waitingInfo.remove();
+        gameArea.append(virus);
+        if(playerProfiles[0].socketId === socket.id){
+            playerTwoTime.innerText = '00.00.000';
+        } else if (playerProfiles[1].socketId === socket.id){
+            playerOneTime.innerText = '00.00.000';
+        }
+        renderTime = new Date();
+        startStopWatch(playerProfiles);
+    }, randomDelay)
 
 });
 
@@ -231,11 +227,6 @@ socket.on('end-game', (scoreResult, playerProfiles) => {
 
 });
 
- 
-playAgainBtn.addEventListener('click', e => {
-    resultContainer.classList.add('d-none');
-    socket.emit('play-again');
-});
 
 socket.on('new-round', (playerProfiles, player) => {
 

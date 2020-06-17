@@ -14,6 +14,9 @@ let rounds = 0;
 
 let playAgain = 0;
 
+let xArray = [];
+let yArray = [];
+
 // Get usernames of online users
 const getOnlinePlayers = function() {
 	return playerProfiles.map(player => player.username);
@@ -27,10 +30,18 @@ const calcRandomDelay = function() {
 	return Math.floor(Math.random() * (3000 - 500) + 500);
 }
 
-const calcRandomPosition = function(measures) {
+/* const calcRandomPosition = function(measures) {
   
 	const randomX = Math.floor(Math.random()*measures.x);
 	const randomY = Math.floor(Math.random()*measures.y);
+	
+	return [randomX,randomY];
+} */
+
+const calcRandomPosition = function(x,y) {
+  
+	const randomX = Math.floor(Math.random()*x);
+	const randomY = Math.floor(Math.random()*y);
 	
 	return [randomX,randomY];
 }
@@ -116,7 +127,7 @@ module.exports = function(socket) {
 
 	});
 
-	socket.on('set-random-data', function(measures) {
+	/* socket.on('set-random-data', function(measures) {
 
 		// check if both players are ready to play
 		playerReady += 1;
@@ -124,6 +135,28 @@ module.exports = function(socket) {
 		if(playerReady === playerProfiles.length) {
 			io.emit('render-virus', calcRandomPosition(measures), calcRandomDelay(), playerProfiles);
 			playerReady = 0;
+		}
+
+	}); */
+
+	socket.on('set-random-data', function(x,y) {
+
+		xArray.push(x);
+		yArray.push(y);
+
+		// check if both players are ready to play
+		playerReady += 1;
+
+		if(playerReady === playerProfiles.length) {
+			
+			//calculate the smallest measures to send for randomization
+			const minX = Math.min(...xArray);
+			const minY = Math.min(...yArray);
+
+			io.emit('render-virus', calcRandomPosition(minX,minY), calcRandomDelay(), playerProfiles);
+			playerReady = 0;
+			xArray = [];
+			yArray = [];
 		}
 
 	});
@@ -135,8 +168,7 @@ module.exports = function(socket) {
 		player.score = 0;
 		player.reactionTime = [];
 		rounds = 0;
-
-		
+				
 		playAgain += 1;
 
 		if(playAgain === 1) {
