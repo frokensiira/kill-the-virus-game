@@ -30,6 +30,8 @@ let renderTime = null;
 let stoppedTime = null;
 let started = null;
 
+let timeElapsed = null;
+
 // Functions
 
 // Render players on scoreboard
@@ -55,14 +57,12 @@ const info = (text = 'Waiting for a second player to join...') => {
 const startStopWatch = (playerProfiles) => {
 
     started = setInterval(function clockRunning(playerProfiles){
-        const currentTime = new Date()
-        const timeElapsed = new Date(currentTime - renderTime)
-            
+        const currentTime = new Date();
+        timeElapsed = new Date(currentTime - renderTime);
 
         const min = timeElapsed.getUTCMinutes()
         const sec = timeElapsed.getUTCSeconds()
         const ms = timeElapsed.getUTCMilliseconds();
-
     
         if(playerProfiles[0].socketId === socket.id) {
             playerOneTime.innerText = 
@@ -123,13 +123,11 @@ virus.addEventListener('click', e => {
     socket.emit('get-players', (playerProfiles) => {
 
         if(playerProfiles[0].socketId === socket.id) {
-            const timeString = playerOneTime.innerText;
-            const reactTime = Number(timeString.replaceAll(':', ''));
-            socket.emit('reaction-time', reactTime);
+            const timePassed = timeElapsed.getTime();
+            socket.emit('reaction-time', timePassed);
         } else if (playerProfiles[1].socketId === socket.id) {
-            const timeString = playerTwoTime.innerText;
-            const reactTime = Number(timeString.replaceAll(':', ''));
-            socket.emit('reaction-time', reactTime);
+            const timePassed = timeElapsed.getTime();
+            socket.emit('reaction-time', timePassed);
         } else {
             console.log('something unexpected happened');
         }
