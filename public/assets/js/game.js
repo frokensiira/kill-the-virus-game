@@ -161,12 +161,7 @@ socket.on('start-game', () => {
     const y = gameArea.offsetWidth-virus.clientWidth;
     virus.remove();
 
-    socket.emit('set-random-data', x, y); 
-    
-    //const measures = {x, y}
-
-    // send measures to server for randomization
-    //socket.emit('set-random-data', measures);    
+    socket.emit('set-random-data', x, y);   
 
 });
 

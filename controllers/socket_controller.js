@@ -51,7 +51,7 @@ const calcPoints = function(io, rounds) {
 
 	io.emit('score', scoreResult, rounds, playerProfiles);
 
-	if(rounds < 2) {
+	if(rounds < 10) {
         io.emit('start-game');
     } else {
 		io.emit('end-game', scoreResult, playerProfiles);
@@ -148,6 +148,8 @@ module.exports = function(socket) {
 		rounds = 0;
 				
 		playAgain += 1;
+
+		console.log('this is playAgain', playAgain);
 
 		if(playAgain === 1) {
 			socket.emit('new-round', playerProfiles, player);
