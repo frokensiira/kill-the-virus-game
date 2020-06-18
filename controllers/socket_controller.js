@@ -38,8 +38,10 @@ const calcRandomPosition = function(x,y) {
 
 const calcPoints = function(io, rounds) {
 	
+	// compare the two players reaction time
 	const time = playerProfiles[0].reactionTime[rounds-1] - playerProfiles[1].reactionTime[rounds-1];
 
+	// give the one with the shortest time the point
 	if(time < 0) {
 		playerProfiles[0].score += 1;
 		
@@ -51,6 +53,7 @@ const calcPoints = function(io, rounds) {
 
 	io.emit('score', scoreResult, rounds, playerProfiles);
 
+	// check which round is playing and continue if not done, else end game
 	if(rounds < 10) {
         io.emit('start-game');
     } else {
@@ -117,6 +120,10 @@ module.exports = function(socket) {
 
 	});
 
+	/**
+	 * Calculate the random data (position and delay)
+	 */
+
 	socket.on('set-random-data', function(x,y) {
 
 		xArray.push(x);
@@ -125,6 +132,7 @@ module.exports = function(socket) {
 		// check if both players are ready to play
 		playerReady += 1;
 
+		// when both players are ready, calculate random data
 		if(playerReady === playerProfiles.length) {
 
 			//calculate the smallest measures to send for randomization
@@ -139,6 +147,10 @@ module.exports = function(socket) {
 
 	});
 
+	/**
+	 * Handle players that want to play the game again (cause why wouldn't they?)
+	 */
+
 	socket.on('play-again', function() {
 
 		// Reset the players score and reactionTimes
@@ -148,8 +160,6 @@ module.exports = function(socket) {
 		rounds = 0;
 				
 		playAgain += 1;
-
-		console.log('this is playAgain', playAgain);
 
 		if(playAgain === 1) {
 			socket.emit('new-round', playerProfiles, player);
@@ -167,6 +177,10 @@ module.exports = function(socket) {
 
 	});
 
+	/**
+	 * Handle the reaction time from players
+	 */
+
 	socket.on('reaction-time', function(reactTime) {
 
 		// add the reaction time to the players list
@@ -183,11 +197,18 @@ module.exports = function(socket) {
 		}
 
 	});
+
+	/**
+	 * Get an updated list of active players and their data
+	 */
  
 	socket.on('get-players', function(cb) {
 		cb(playerProfiles);
 	});
 
+	/**
+	 * Handle when a player disconnected
+	 */
 	socket.on('disconnect', function() {
 
 		// check if player is registered
